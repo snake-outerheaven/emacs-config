@@ -1,20 +1,6 @@
 ;;; init.el --- "Ultimate Rice" IDE Config -*- lexical-binding: t; -*-
 
 ;; =============================================================================
-;; 0. NERD FONTS SETUP (FIX FOR BROKEN ICONS IN GTK EMACS)
-;; =============================================================================
-;; Issue: Icons missing or shown as boxes in Emacs GUI.
-;; Solution:
-;;   1. Run M-x nerd-icons-install-fonts inside Emacs.
-;;   2. On Linux, run `fc-cache -fv` in terminal.
-;;   3. Uncomment and set appropriate font family if needed.
-;;   4. If still broken, run M-x nerd-icons-set-font.
-;;
-(require 'nerd-icons)
-(setq nerd-icons-font-family "Symbols Nerd Font Mono")
-;; (setq nerd-icons-font-family "FiraCode Nerd Font Mono") ; alternative
-
-;; =============================================================================
 ;; 1. PERFORMANCE TWEAKS
 ;; =============================================================================
 (setq gc-cons-threshold most-positive-fixnum
@@ -49,7 +35,28 @@
   (require 'no-littering))
 
 ;; =============================================================================
-;; 4. AESTHETICS & ICONS (THE "RICE")
+;; 4. NERD FONTS SETUP (FIX FOR BROKEN ICONS IN GTK EMACS)
+;; =============================================================================
+;; Issue: Icons missing or shown as boxes in Emacs GUI.
+;; Solution:
+;;   1. Run M-x nerd-icons-install-fonts inside Emacs.
+;;   2. On Linux, run `fc-cache -fv` in terminal.
+;;   3. Uncomment and set appropriate font family if needed.
+;;   4. If still broken, run M-x nerd-icons-set-font.
+;;
+(use-package nerd-icons
+  :custom
+  (nerd-icons-font-family "Symbols Nerd Font Mono"))
+;; (setq nerd-icons-font-family "FiraCode Nerd Font Mono") ; alternative
+
+(use-package nerd-icons-dired
+  :hook (dired-mode . nerd-icons-dired-mode))
+
+(use-package nerd-icons-ibuffer
+  :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
+
+;; =============================================================================
+;; 5. AESTHETICS & ICONS (THE "RICE")
 ;; =============================================================================
 (setq inhibit-startup-message t
       initial-scratch-message nil)
@@ -62,13 +69,6 @@
 ;; Emoji insertion (Emacs 29+ built-in)
 (when (fboundp 'emoji-insert)
   (define-key global-map (kbd "C-x 8 e") 'emoji-insert))
-
-;; Icon packages
-(use-package nerd-icons)
-(use-package nerd-icons-dired
-  :hook (dired-mode . nerd-icons-dired-mode))
-(use-package nerd-icons-ibuffer
-  :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
 
 ;; Catppuccin theme
 (use-package catppuccin-theme
@@ -110,7 +110,7 @@
         dashboard-set-file-icons t))
 
 ;; =============================================================================
-;; 5. COMPLETION ENGINE (VERTICO + ORDERLESS + MARGINALIA + CONSULT)
+;; 6. COMPLETION ENGINE (VERTICO + ORDERLESS + MARGINALIA + CONSULT)
 ;; =============================================================================
 (use-package vertico
   :init (vertico-mode)
@@ -141,7 +141,6 @@
   (consult-narrow-key "<")
   (consult-line-numbers-widen t))
 
-;; Consult-dir
 (use-package consult-dir
   :bind (("C-x C-d" . consult-dir)
          :map vertico-map
@@ -149,7 +148,7 @@
   :config (recentf-mode 1))
 
 ;; =============================================================================
-;; 6. POPUP COMPLETION (CORFU)
+;; 7. POPUP COMPLETION (CORFU)
 ;; =============================================================================
 (use-package corfu
   :custom
@@ -170,7 +169,7 @@
   :config (corfu-terminal-mode +1))
 
 ;; =============================================================================
-;; 7. IDE FUNCTIONS (EGLOT + TREESITTER + CONSULT-EGLOT)
+;; 8. IDE FUNCTIONS (EGLOT + TREESITTER + CONSULT-EGLOT)
 ;; =============================================================================
 (use-package eglot
   :ensure nil
@@ -199,7 +198,7 @@
   (setq eglot-ignored-server-capabilities '(:inlayHintProvider)))
 
 ;; =============================================================================
-;; 8. VERSION CONTROL (MAGIT + VC)
+;; 9. VERSION CONTROL (MAGIT + VC)
 ;; =============================================================================
 (use-package magit
   :bind (("C-x g" . magit-status)
@@ -214,7 +213,7 @@
 (keymap-set global-map "C-x v d" #'vc-dir)
 
 ;; =============================================================================
-;; 9. FILE MANAGER (DIRED ENHANCEMENTS)
+;; 10. FILE MANAGER (DIRED ENHANCEMENTS)
 ;; =============================================================================
 (use-package dired
   :ensure nil
@@ -237,7 +236,7 @@
   (dired-preview-ignored-extensions-regexp ".\\(pdf\\|docx\\|xlsx\\)$"))
 
 ;; =============================================================================
-;; 10. ESHELL (EMACS SHELL)
+;; 11. ESHELL (EMACS SHELL)
 ;; =============================================================================
 (use-package eshell
   :ensure nil
@@ -257,7 +256,7 @@
   (add-hook 'eshell-mode-hook (lambda () (setq show-trailing-whitespace nil))))
 
 ;; =============================================================================
-;; 11. BUFFER MANAGEMENT (IBUFFER)
+;; 12. BUFFER MANAGEMENT (IBUFFER)
 ;; =============================================================================
 (use-package ibuffer
   :bind (("C-x C-b" . ibuffer))
@@ -273,7 +272,7 @@
             (lambda () (ibuffer-switch-to-saved-filter-groups "default"))))
 
 ;; =============================================================================
-;; 12. HELPFUL (BETTER DOCUMENTATION)
+;; 13. HELPFUL (BETTER DOCUMENTATION)
 ;; =============================================================================
 (use-package helpful
   :bind (("C-h f" . helpful-callable)
@@ -284,7 +283,7 @@
          ("F" . helpful-function)))
 
 ;; =============================================================================
-;; 13. WHICH-KEY (DISCOVER KEYBINDS)
+;; 14. WHICH-KEY (DISCOVER KEYBINDS)
 ;; =============================================================================
 (use-package which-key
   :defer 1
@@ -295,7 +294,7 @@
         which-key-side-window-slot -1))
 
 ;; =============================================================================
-;; 14. GENERAL UTILITIES
+;; 15. GENERAL UTILITIES
 ;; =============================================================================
 (electric-pair-mode 1)
 (savehist-mode 1)
@@ -307,7 +306,7 @@
   :config (save-place-mode 1))
 
 ;; =============================================================================
-;; 15. CUSTOM KEYBINDINGS
+;; 16. CUSTOM KEYBINDINGS
 ;; =============================================================================
 (defvar-keymap my-code-map
   "r" #'eglot-rename
@@ -322,3 +321,15 @@
 ;; =============================================================================
 (provide 'init)
 ;;; init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages nil))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
