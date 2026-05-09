@@ -275,11 +275,11 @@
   :config
   (setq ibuffer-saved-filter-groups
         '((default
-            ("Dired" (mode . dired-mode))
-            ("Eshell" (mode . eshell-mode))
-            ("Magit" (name . "^magit"))
-            ("Code" (or (mode . prog-mode) (mode . text-mode)
-                        (mode . fundamental-mode))))))
+           ("Dired" (mode . dired-mode))
+           ("Eshell" (mode . eshell-mode))
+           ("Magit" (name . "^magit"))
+           ("Code" (or (mode . prog-mode) (mode . text-mode)
+                       (mode . fundamental-mode))))))
   (add-hook 'ibuffer-mode-hook
             (lambda () (ibuffer-switch-to-saved-filter-groups "default"))))
 
@@ -333,3 +333,19 @@
 ;; =============================================================================
 (provide 'init)
 ;;; init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-enabled-themes '(doom-solarized-light))
+ '(custom-safe-themes
+   '("0f1341c0096825b1e5d8f2ed90996025a0d013a0978677956a9e61408fcd2c77"
+     default))
+ '(package-selected-packages nil))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
