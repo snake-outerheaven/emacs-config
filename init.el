@@ -181,26 +181,24 @@
   :config (corfu-terminal-mode +1))
 
 ;; =============================================================================
-;; 8. IDE FUNCTIONS (EGLOT + TREESITTER + CONSULT-EGLOT)
+;; 8. IDE FUNCTIONS (EGLOT ONLY - NO TREESITTER)
 ;; =============================================================================
 (use-package eglot
   :ensure nil
-  :hook ((python-ts-mode c-ts-mode c++-ts-mode js-ts-mode java-mode) . eglot-ensure)
+  :hook ((c-mode c++-mode python-mode js-mode java-mode) . eglot-ensure)
   :config
   (setq eglot-events-buffer-config '(:size 0 :format full)
         eglot-autoshutdown t
         eglot-connect-timeout 30)
   (add-to-list 'eglot-server-programs
-               '((c-mode c++-mode c-ts-mode c++-ts-mode) .
+               '((c-mode c++-mode) .
                  ("clangd" "--header-insertion=never" "--background-index" "-j=4")))
   (add-to-list 'eglot-server-programs
                '(python-mode . ("pyright-langserver" "--stdio")))
   (add-to-list 'eglot-server-programs
-               '(js-mode js-ts-mode . ("typescript-language-server" "--stdio"))))
-
-(use-package treesit-auto
-  :custom (treesit-auto-install 'prompt)
-  :config (global-treesit-auto-mode))
+               '(js-mode . ("typescript-language-server" "--stdio")))
+  (add-to-list 'eglot-server-programs
+               '(java-mode . ("jdtls"))))
 
 (use-package consult-eglot
   :bind (:map eglot-mode-map
