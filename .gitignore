@@ -4,6 +4,7 @@ etc/
 
 # Pasta de pacotes instalados
 elpa/
+eln-cache/
 
 # Arquivos compilados e temporários do Emacs
 *.elc

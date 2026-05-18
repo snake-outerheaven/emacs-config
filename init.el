@@ -97,7 +97,6 @@
   :hook (xref-after-jump . (lambda () (pulse-momentary-highlight-one-line (point)))))
 
 (use-package dashboard
-  :if (display-graphic-p)
   :init
   (dashboard-setup-startup-hook)
   :config
