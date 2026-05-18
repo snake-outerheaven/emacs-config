@@ -1,0 +1,11 @@
+# Pastas de dados e cache (gerenciadas pelo no-littering no seu init.el)
+var/
+etc/
+
+# Pasta de pacotes instalados
+elpa/
+
+# Arquivos compilados e temporários do Emacs
+*.elc
+*~
+\#*\#

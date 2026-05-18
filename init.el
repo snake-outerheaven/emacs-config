@@ -3,14 +3,9 @@
 ;; =============================================================================
 ;; 1. PERFORMANCE TWEAKS
 ;; =============================================================================
-(setq gc-cons-threshold most-positive-fixnum
-      gc-cons-percentage 0.6
-      read-process-output-max (* 1024 1024))
-
-(add-hook 'after-init-hook
-          (lambda ()
-            (setq gc-cons-threshold 16000000
-                  gc-cons-percentage 0.1)))
+(setq gc-cons-threshold (* 50 1024 1024)
+      read-process-output-max (* 1024 1024)
+      create-lockfiles nil) ;; Menos lixo no sistema de arquivos
 
 ;; =============================================================================
 ;; 2. PACKAGE INFRASTRUCTURE
@@ -24,6 +19,10 @@
   (package-install 'use-package))
 (require 'use-package)
 (setq use-package-always-ensure t)
+
+;; Performance package (Doom style)
+(use-package gcmh
+  :config (gcmh-mode 1))
 
 ;; =============================================================================
 ;; 3. NO LITTERING (CLEAN CACHE & CONFIG DIRS)
@@ -55,17 +54,14 @@
 (use-package nerd-icons-ibuffer
   :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
 
-;; =============================================================================
-;; 5. AESTHETICS & ICONS (THE "RICE")
-;; =============================================================================
-(setq inhibit-startup-message t
-      initial-scratch-message nil)
-
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (global-display-line-numbers-mode t)
 
+;; =============================================================================
+;; 5. THEME & UI ELEMENTS
+;; =============================================================================
 ;; Emoji insertion (Emacs 29+ built-in)
 (when (fboundp 'emoji-insert)
   (define-key global-map (kbd "C-x 8 e") 'emoji-insert))
@@ -77,9 +73,6 @@
   ;; Global theme settings
   (setq doom-themes-enable-bold t    ; Enable bold in themes
         doom-themes-enable-italic t) ; Enable italics
-
-  ;; Load the main theme (choose your preference)
-  (load-theme 'doom-one t)
 
   ;; Enhance org-mode fontification (if you use org-mode)
   (doom-themes-org-config)
@@ -96,33 +89,34 @@
   (doom-modeline-lsp t)
   (doom-modeline-env-version t))
 
-;; Rainbow delimiters
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
 
-;; Pulse on navigation
 (use-package pulse
   :ensure nil
   :hook (xref-after-jump . (lambda () (pulse-momentary-highlight-one-line (point)))))
 
-;; Dashboard
 (use-package dashboard
-  :config
+  :if (display-graphic-p)
+  :init
   (dashboard-setup-startup-hook)
+  :config
   (setq dashboard-banner-logo-title "GNU Emacs"
         dashboard-startup-banner 'logo
+        dashboard-image-banner-max-height 200
         dashboard-center-content t
-        dashboard-show-shortcuts t
-        dashboard-items '((recents  . 5)
-                          (projects . 5)
-                          (bookmarks . 5))
-        dashboard-display-icons-p t
+        dashboard-show-shortcuts nil
+        dashboard-projects-backend 'projectile
+        dashboard-set-init-info t
+        dashboard-set-footer nil
+        dashboard-items '((recents . 5)
+                          (projects . 5))
+        dashboard-set-file-icons t
         dashboard-icon-type 'nerd-icons
-        dashboard-set-heading-icons t
-        dashboard-set-file-icons t))
+        dashboard-set-heading-icons t))
 
 ;; =============================================================================
-;; 6. COMPLETION ENGINE (VERTICO + ORDERLESS + MARGINALIA + CONSULT)
+;; 6. COMPLETION ENGINE (THE MODERN STACK)
 ;; =============================================================================
 (use-package vertico
   :init (vertico-mode)
@@ -142,25 +136,38 @@
   :init (marginalia-mode))
 
 (use-package consult
+  :defer t
   :bind (("C-s" . consult-line)
          ("C-x b" . consult-buffer)
          ("M-g g" . consult-goto-line)
          ("M-y" . consult-yank-pop)
          ("M-s f" . consult-find)
-         ("M-s g" . consult-grep)
-         ("M-s l" . consult-locate))
+         ("M-s r" . consult-ripgrep)
+         ("M-s l" . consult-line))
   :custom
   (consult-narrow-key "<")
   (consult-line-numbers-widen t))
 
+(use-package embark
+  :bind (("C-." . embark-act)         ; "The Magic Button" - ações de contexto
+         ("M-." . embark-dwim)        ; Ação inteligente baseada no cursor
+         ("C-h B" . embark-bindings)) ; Ver todos os atalhos possíveis aqui
+  :init (setq prefix-help-command #'embark-prefix-help-command))
+
+(use-package embark-consult
+  :ensure t
+  :after (embark consult)
+  :hook (embark-collect-mode . consult-preview-at-point-mode))
+
 (use-package consult-dir
+  :after vertico
   :bind (("C-x C-d" . consult-dir)
          :map vertico-map
          ("C-x C-d" . consult-dir))
   :config (recentf-mode 1))
 
 ;; =============================================================================
-;; 7. POPUP COMPLETION (CORFU)
+;; 7. CODE COMPLETION (CORFU)
 ;; =============================================================================
 (use-package corfu
   :custom
@@ -181,15 +188,18 @@
   :config (corfu-terminal-mode +1))
 
 ;; =============================================================================
-;; 8. IDE FUNCTIONS (EGLOT ONLY - NO TREESITTER)
+;; 8. IDE (EGLOT)
 ;; =============================================================================
 (use-package eglot
   :ensure nil
-  :hook ((c-mode c++-mode python-mode js-mode java-mode) . eglot-ensure)
+  :hook ((c-mode c++-mode python-mode js-mode java-mode lua-mode) . eglot-ensure)
+  :bind (:map eglot-mode-map
+              ("C-c r" . eglot-rename)
+              ("C-c a" . eglot-code-actions))
   :config
   (setq eglot-events-buffer-config '(:size 0 :format full)
         eglot-autoshutdown t
-        eglot-connect-timeout 30)
+        eglot-connect-timeout 60)
   (add-to-list 'eglot-server-programs
                '((c-mode c++-mode) .
                  ("clangd" "--header-insertion=never" "--background-index" "-j=4")))
@@ -197,18 +207,15 @@
                '(python-mode . ("pyright-langserver" "--stdio")))
   (add-to-list 'eglot-server-programs
                '(js-mode . ("typescript-language-server" "--stdio")))
-  (add-to-list 'eglot-server-programs
-               '(java-mode . ("jdtls"))))
+  (add-to-list 'eglot-server-programs '(lua-mode . ("lua-language-server"))))
 
 
 (use-package lua-mode
   :ensure t
-  :mode ("\\.lua\\'" . lua-mode)
-  :hook (lua-mode . eglot-ensure)
-  :config
-  (add-to-list 'eglot-server-programs '(lua-mode . ("lua-language-server"))))
+  :mode ("\\.lua\\'" . lua-mode))
 
 (use-package consult-eglot
+  :after eglot
   :bind (:map eglot-mode-map
               ("M-s l" . consult-eglot-symbols)))
 
@@ -222,7 +229,7 @@
   :bind (("C-x g" . magit-status)
          ("C-x M-g" . magit-dispatch-popup)
          ("C-c M-g" . magit-file-dispatch))
-  :config
+  :init
   (setq magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
 (keymap-set global-map "C-x v =" #'vc-diff)
@@ -240,7 +247,7 @@
               ("C-c C-c" . dired-do-async-shell-command)
               ("C-x C-j" . dired-jump)
               ("z" . dired-do-compress-to))
-  :config
+  :init
   (setq dired-listing-switches "-lha --group-directories-first"
         dired-dwim-target t
         dired-recursive-copies 'always
@@ -260,21 +267,22 @@
   :ensure nil
   :bind (("C-!" . eshell)
          ("C-c !" . eshell-command))
-  :hook (eshell-mode . (lambda ()
-                         (eshell-aliases)
-                         (company-mode -1)))
   :config
-  (defun eshell-aliases ()
+  (defun my-eshell-setup ()
+    "Configurações personalizadas para o ambiente Eshell."
     (eshell/alias "ff" "find-file $1")
     (eshell/alias "dired" "find-file $1")
-    (eshell/alias "z" "cd $1 && ls"))
+    (eshell/alias "z" "cd $1 && ls")
+    (setq show-trailing-whitespace nil))
+
+  (add-hook 'eshell-mode-hook #'my-eshell-setup)
+
   (setq eshell-history-size 10000
         eshell-save-history-on-exit t
-        eshell-banner-message "")
-  (add-hook 'eshell-mode-hook (lambda () (setq show-trailing-whitespace nil))))
+        eshell-banner-message ""))
 
 ;; =============================================================================
-;; 12. BUFFER MANAGEMENT (IBUFFER)
+;; 13. BUFFER MANAGEMENT (IBUFFER)
 ;; =============================================================================
 (use-package ibuffer
   :bind (("C-x C-b" . ibuffer))
@@ -304,12 +312,11 @@
 ;; 14. WHICH-KEY (DISCOVER KEYBINDS)
 ;; =============================================================================
 (use-package which-key
-  :defer 1
-  :config
-  (which-key-mode)
-  (setq which-key-idle-delay 0.5
-        which-key-popup-type 'side-window
-        which-key-side-window-slot -1))
+  :init (which-key-mode)
+  :custom
+  (which-key-idle-delay 0.3)
+  (which-key-popup-type 'side-window)
+  (which-key-side-window-slot -1))
 
 ;; =============================================================================
 ;; 15. GENERAL UTILITIES
@@ -324,48 +331,69 @@
   :config (save-place-mode 1))
 
 ;; =============================================================================
-;; 16. CUSTOM KEYBINDINGS
+;; 16. NAVIGATION & SELECTION (DOOM STYLE QoL)
 ;; =============================================================================
-(defvar-keymap my-code-map
-  "r" #'eglot-rename
-  "a" #'eglot-code-actions
-  "f" #'eglot-format-buffer
-  "d" #'xref-find-definitions
-  "h" #'eldoc)
+(use-package avy
+  :bind ("M-j" . avy-goto-char-timer) ; Pule para qualquer lugar da tela com 2 letras
+  :custom (avy-timeout-seconds 0.3))
 
-(keymap-set global-map "C-c c" my-code-map)
+(use-package expand-region
+  :bind ("C-=" . er/expand-region))   ; Seleção semântica (expande o range)
+
+;; Better Undo (similar ao comportamento do Doom)
+(use-package undo-fu
+  :bind (("C-z" . undo-fu-only-undo)
+         ("C-S-z" . undo-fu-only-redo)))
+
+;; =============================================================================
+;; 17. PROJECT MANAGEMENT (PROJECTILE)
+;; =============================================================================
+(use-package projectile
+  :diminish projectile-mode
+  :config (projectile-mode)
+  :bind-keymap ("C-c p" . projectile-command-map)
+  :init
+  (setq projectile-project-search-path '("~/Projects" "~/src") ; Ajuste seus caminhos
+        projectile-switch-project-action #'projectile-dired))
+
+(use-package consult-projectile
+  :after (consult projectile)
+  :bind (:map projectile-command-map
+              ("p" . consult-projectile)))
+
+;; =============================================================================
+;; 18. VISUAL FEEDBACK & OVERLAYS
+;; =============================================================================
+;; Git gutter (mostra alterações na margem esquerda)
+(use-package diff-hl
+  :init
+  (global-diff-hl-mode)
+  :hook ((magit-pre-refresh . diff-hl-magit-pre-refresh)
+         (magit-post-refresh . diff-hl-magit-post-refresh)))
+
+;; Highlight TODO/FIXME/NOTE
+(use-package hl-todo
+  :hook (prog-mode . hl-todo-mode)
+  :custom
+  (hl-todo-keyword-faces
+   '(("TODO"  . "#FF0000") ("FIXME" . "#FF0000") ("NOTE"  . "#00FF00"))))
+
+;; =============================================================================
+;; 19. CUSTOM KEYBINDINGS
+;; =============================================================================
 (keymap-set global-map "C-x k" #'kill-current-buffer)
+(keymap-set global-map "M-/" #'comment-line) ;; Atalho rápido para comentar
+
+;; Ergonomia: Use "ESC" como C-g (Estilo Doom/Vim mas em bindings normais)
+(define-key key-translation-map (kbd "ESC") (kbd "C-g"))
+
+;; =============================================================================
+;; 20. CUSTOM FILE (LOAD LAST TO PRESERVE USER OVERRIDES)
+;; =============================================================================
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(when (file-exists-p custom-file)
+  (load custom-file))
 
 ;; =============================================================================
 (provide 'init)
 ;;; init.el ends here
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-enabled-themes '(doom-gruvbox-light))
- '(custom-safe-themes
-   '("aec7b55f2a13307a55517fdf08438863d694550565dee23181d2ebd973ebd6b8"
-     "9b9d7a851a8e26f294e778e02c8df25c8a3b15170e6f9fd6965ac5f2544ef2a9"
-     "b7a09eb77a1e9b98cafba8ef1bd58871f91958538f6671b22976ea38c2580755"
-     "e4a702e262c3e3501dfe25091621fe12cd63c7845221687e36a79e17cf3a67e0"
-     "3613617b9953c22fe46ef2b593a2e5bc79ef3cc88770602e7e569bbd71de113b"
-     "87fa3605a6501f9b90d337ed4d832213155e3a2e36a512984f83e847102a42f4"
-     "42a6583a45e0f413e3197907aa5acca3293ef33b4d3b388f54fa44435a494739"
-     "c9d837f562685309358d8dc7fccb371ed507c0ae19cf3c9ae67875db0c038632"
-     "70c88c01b0b5fde9ecf3bb23d542acba45bb4c5ae0c1330b965def2b6ce6fac3"
-     "088cd6f894494ac3d4ff67b794467c2aa1e3713453805b93a8bcb2d72a0d1b53"
-     "fffef514346b2a43900e1c7ea2bc7d84cbdd4aa66c1b51946aade4b8d343b55a"
-     "dfb1c8b5bfa040b042b4ef660d0aab48ef2e89ee719a1f24a4629a0c5ed769e8"
-     "02d422e5b99f54bd4516d4157060b874d14552fe613ea7047c4a5cfa1288cf4f"
-     "720838034f1dd3b3da66f6bd4d053ee67c93a747b219d1c546c41c4e425daf93"
-     "0f1341c0096825b1e5d8f2ed90996025a0d013a0978677956a9e61408fcd2c77"
-     default))
- '(package-selected-packages nil))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
