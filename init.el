@@ -383,9 +383,6 @@
 (keymap-set global-map "C-x k" #'kill-current-buffer)
 (keymap-set global-map "M-/" #'comment-line) ;; Atalho rápido para comentar
 
-;; Ergonomia: Use "ESC" como C-g (Estilo Doom/Vim mas em bindings normais)
-(define-key key-translation-map (kbd "ESC") (kbd "C-g"))
-
 ;; =============================================================================
 ;; 20. CUSTOM FILE (LOAD LAST TO PRESERVE USER OVERRIDES)
 ;; =============================================================================
