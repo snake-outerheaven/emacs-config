@@ -81,6 +81,12 @@
   ;; (doom-themes-visual-bell-config)
   )
 
+;; gruvbox-theme
+(use-package gruvbox-theme
+  :ensure t
+  :config
+  (load-theme 'gruvbox-light-soft t))
+
 ;; Doom modeline
 (use-package doom-modeline
   :init (doom-modeline-mode 1)
