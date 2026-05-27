@@ -5,7 +5,7 @@
 ;; =============================================================================
 (setq gc-cons-threshold (* 50 1024 1024)
       read-process-output-max (* 1024 1024)
-      create-lockfiles nil) ;; Menos lixo no sistema de arquivos
+      create-lockfiles nil) ;; Less filesystem clutter
 
 ;; =============================================================================
 ;; 2. PACKAGE INFRASTRUCTURE
@@ -66,7 +66,7 @@
 (when (fboundp 'emoji-insert)
   (define-key global-map (kbd "C-x 8 e") 'emoji-insert))
 
-;; Doom Themes (replaces kanagawa-themes)
+;; Doom Themes (collection of many themes)
 (use-package doom-themes
   :ensure t
   :config
@@ -81,11 +81,10 @@
   ;; (doom-themes-visual-bell-config)
   )
 
-;; gruvbox-theme
+;; gruvbox-theme (installed but not loaded by default – choose manually)
 (use-package gruvbox-theme
-  :ensure t
-  :config
-  (load-theme 'gruvbox-light-soft t))
+  :ensure t)
+;; To activate: M-x load-theme RET gruvbox-light-soft RET
 
 ;; Doom modeline
 (use-package doom-modeline
@@ -154,9 +153,9 @@
   (consult-line-numbers-widen t))
 
 (use-package embark
-  :bind (("C-." . embark-act)         ; "The Magic Button" - ações de contexto
-         ("M-." . embark-dwim)        ; Ação inteligente baseada no cursor
-         ("C-h B" . embark-bindings)) ; Ver todos os atalhos possíveis aqui
+  :bind (("C-." . embark-act)         ; "The Magic Button" - context actions
+         ("M-." . embark-dwim)        ; Smart action based on cursor
+         ("C-h B" . embark-bindings)) ; List all possible keybindings here
   :init (setq prefix-help-command #'embark-prefix-help-command))
 
 (use-package embark-consult
@@ -274,7 +273,7 @@
          ("C-c !" . eshell-command))
   :config
   (defun my-eshell-setup ()
-    "Configurações personalizadas para o ambiente Eshell."
+    "Custom setup for Eshell environment."
     (eshell/alias "ff" "find-file $1")
     (eshell/alias "dired" "find-file $1")
     (eshell/alias "z" "cd $1 && ls")
@@ -287,7 +286,7 @@
         eshell-banner-message ""))
 
 ;; =============================================================================
-;; 13. BUFFER MANAGEMENT (IBUFFER)
+;; 12. BUFFER MANAGEMENT (IBUFFER)
 ;; =============================================================================
 (use-package ibuffer
   :bind (("C-x C-b" . ibuffer))
@@ -339,13 +338,13 @@
 ;; 16. NAVIGATION & SELECTION (DOOM STYLE QoL)
 ;; =============================================================================
 (use-package avy
-  :bind ("M-j" . avy-goto-char-timer) ; Pule para qualquer lugar da tela com 2 letras
+  :bind ("M-j" . avy-goto-char-timer) ; Jump anywhere on screen with 2 letters
   :custom (avy-timeout-seconds 0.3))
 
 (use-package expand-region
-  :bind ("C-=" . er/expand-region))   ; Seleção semântica (expande o range)
+  :bind ("C-=" . er/expand-region))   ; Semantic selection (expands range)
 
-;; Better Undo (similar ao comportamento do Doom)
+;; Better Undo (similar to Doom's behaviour)
 (use-package undo-fu
   :bind (("C-z" . undo-fu-only-undo)
          ("C-S-z" . undo-fu-only-redo)))
@@ -358,7 +357,7 @@
   :config (projectile-mode)
   :bind-keymap ("C-c p" . projectile-command-map)
   :init
-  (setq projectile-project-search-path '("~/Projects" "~/src") ; Ajuste seus caminhos
+  (setq projectile-project-search-path '("~/Projects" "~/src") ; Adjust paths as needed
         projectile-switch-project-action #'projectile-dired))
 
 (use-package consult-projectile
@@ -369,7 +368,7 @@
 ;; =============================================================================
 ;; 18. VISUAL FEEDBACK & OVERLAYS
 ;; =============================================================================
-;; Git gutter (mostra alterações na margem esquerda)
+;; Git gutter (shows changes in the left margin)
 (use-package diff-hl
   :init
   (global-diff-hl-mode)
@@ -387,7 +386,7 @@
 ;; 19. CUSTOM KEYBINDINGS
 ;; =============================================================================
 (keymap-set global-map "C-x k" #'kill-current-buffer)
-(keymap-set global-map "M-/" #'comment-line) ;; Atalho rápido para comentar
+(keymap-set global-map "M-/" #'comment-line) ;; Quick comment shortcut
 
 ;; =============================================================================
 ;; 20. CUSTOM FILE (LOAD LAST TO PRESERVE USER OVERRIDES)
@@ -395,6 +394,23 @@
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (when (file-exists-p custom-file)
   (load custom-file))
+
+;; =============================================================================
+;; 21. DISCORD RICH PRESENCE (ELCORD)
+;; =============================================================================
+(use-package elcord
+  :ensure t
+  :init
+  (elcord-mode 1)
+  :config
+  ;; Show buffer details and current line
+  (setq elcord-display-buffer-details t)
+  ;; Use the major mode icon as the main icon
+  (setq elcord-use-major-mode-as-main-icon t)
+  ;; Optional: map custom icons for themes or modes (example for gruvbox)
+  (setq elcord-mode-icon-alist
+        '((gruvbox-theme . "gruvbox")
+          (gruvbox-light-theme . "gruvbox"))))
 
 ;; =============================================================================
 (provide 'init)

@@ -4,9 +4,12 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes '(gruvbox-light-soft))
+ '(custom-enabled-themes '(doom-1337))
  '(custom-safe-themes
-   '("18a1d83b4e16993189749494d75e6adb0e15452c80c431aca4a867bcc8890ca9"
+   '("8363207a952efb78e917230f5a4d3326b2916c63237c1f61d7e5fe07def8d378"
+     "aec7b55f2a13307a55517fdf08438863d694550565dee23181d2ebd973ebd6b8"
+     "720838034f1dd3b3da66f6bd4d053ee67c93a747b219d1c546c41c4e425daf93"
+     "18a1d83b4e16993189749494d75e6adb0e15452c80c431aca4a867bcc8890ca9"
      "51fa6edfd6c8a4defc2681e4c438caf24908854c12ea12a1fbfd4d055a9647a3"
      "d97ac0baa0b67be4f7523795621ea5096939a47e8b46378f79e78846e0e4ad3d"
      "0f1341c0096825b1e5d8f2ed90996025a0d013a0978677956a9e61408fcd2c77"
