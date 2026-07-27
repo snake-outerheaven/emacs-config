@@ -196,7 +196,7 @@
 ;; =============================================================================
 (use-package eglot
   :ensure nil
-  :hook ((c-mode c++-mode python-mode js-mode java-mode lua-mode) . eglot-ensure)
+  :hook ((c-mode c++-mode python-mode js-mode java-mode lua-mode rust-mode) . eglot-ensure)
   :bind (:map eglot-mode-map
               ("C-c r" . eglot-rename)
               ("C-c a" . eglot-code-actions))
@@ -217,6 +217,15 @@
 (use-package lua-mode
   :ensure t
   :mode ("\\.lua\\'" . lua-mode))
+
+;; Rust support
+(use-package rust-mode
+  :ensure t
+  :mode ("\\.rs\\'" . rust-mode)
+  :after eglot           ; Garante que o eglot já esteja carregado
+  :hook (rust-mode . eglot-ensure)
+  :config
+  (add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer"))))
 
 (use-package consult-eglot
   :after eglot
@@ -413,5 +422,14 @@
           (gruvbox-light-theme . "gruvbox"))))
 
 ;; =============================================================================
+;; =============================================================================
+;; 22. MOUSE HOVER DOCUMENTATION (ELDOC-MOUSE)
+;; =============================================================================
+(use-package eldoc-mouse
+  :ensure t
+  :hook (eglot-managed-mode)   ; Ativa em buffers com Eglot ativo
+  :bind ("C-h ." . eldoc-mouse-pop-doc-at-cursor))
+;; =============================================================================
+
 (provide 'init)
 ;;; init.el ends here
