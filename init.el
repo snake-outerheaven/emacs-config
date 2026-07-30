@@ -222,10 +222,19 @@
 (use-package rust-mode
   :ensure t
   :mode ("\\.rs\\'" . rust-mode)
-  :after eglot           ; Garante que o eglot já esteja carregado
+  :after eglot
   :hook (rust-mode . eglot-ensure)
   :config
   (add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer"))))
+
+;; Go support (gopls)
+(use-package go-mode
+  :ensure t
+  :mode ("\\.go\\'" . go-mode)
+  :hook (go-mode . eglot-ensure)
+  :after eglot
+  :config
+  (add-to-list 'eglot-server-programs '(go-mode . ("gopls"))))
 
 (use-package consult-eglot
   :after eglot
