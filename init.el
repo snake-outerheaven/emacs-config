@@ -59,6 +59,10 @@
 (scroll-bar-mode -1)
 (global-display-line-numbers-mode t)
 
+;; Fonte: Cascadia Code (pacote apt fonts-cascadia-code); sem download.
+(when (find-font (font-spec :name "Cascadia Code"))
+  (set-face-attribute 'default nil :family "Cascadia Code" :height 110))
+
 ;; =============================================================================
 ;; 5. THEME & UI ELEMENTS
 ;; =============================================================================
