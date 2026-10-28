@@ -4,7 +4,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes '(gruvbox))
+ '(custom-enabled-themes '(doom-1337))
  '(custom-safe-themes
    '("f2f7fbafdb70d61c6018a6d902b0f1420400da4d25397a79d0096b36d5a79307"
      "8d3ef5ff6273f2a552152c7febc40eabca26bae05bd12bc85062e2dc224cde9a"
